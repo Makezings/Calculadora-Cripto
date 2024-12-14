@@ -30,19 +30,55 @@ def estilitzar():
 # Aplica els estils personalitzats
 estilitzar()
 
+# **Inicialitza valors a Session State si no existeixen**
+for key, value in {
+    "calc_preu_compra": 0.0,
+    "calc_preu_venda": 0.0,
+    "calc_unitats": 0.0,
+    "sim_tokens_actuals": 1.0,
+    "sim_preu_venda": 0.0,
+    "sim_preu_recompra": 0.0,
+}.items():
+    if key not in st.session_state:
+        st.session_state[key] = value
+
+# Funció per gestionar el checkbox i copiar les dades
+def copiar_dades():
+    st.session_state.sim_tokens_actuals = st.session_state.calc_unitats
+    st.session_state.sim_preu_venda = st.session_state.calc_preu_venda
+    st.session_state.sim_preu_recompra = st.session_state.calc_preu_compra
+
 # **Primera calculadora: Guanys/pèrdues**
 st.title("Calculadora per criptomonedes")
 
 st.header("Calculadora de guanys/pèrdues")
-preu_compra = st.number_input("Preu de compra unitari (USD)", value=0.0, step=0.0001, format="%.8f", key="calc_preu_compra")
-preu_venda = st.number_input("Preu de venda unitari (USD)", value=0.0, step=0.0001, format="%.8f", key="calc_preu_venda")
-unitats = st.number_input("Unitats (comprades o venudes)", value=0.0, step=0.0001, format="%.8f", key="calc_unitats")
+st.number_input(
+    "Preu de compra unitari (USD)",
+    step=0.0001,
+    format="%.8f",
+    key="calc_preu_compra",
+)
+st.number_input(
+    "Preu de venda unitari (USD)",
+    step=0.0001,
+    format="%.8f",
+    key="calc_preu_venda",
+)
+st.number_input(
+    "Unitats (comprades o venudes)",
+    step=0.0001,
+    format="%.8f",
+    key="calc_unitats",
+)
 
 # Botó per calcular
 if st.button("Calcular guanys/pèrdues"):
     comissio = 0.00075
-    guany_unitari = preu_venda * (1 - comissio) - preu_compra * (1 + comissio)
-    guany_total = guany_unitari * unitats
+    guany_unitari = (
+        st.session_state.calc_preu_venda * (1 - comissio)
+        - st.session_state.calc_preu_compra * (1 + comissio)
+    )
+    guany_total = guany_unitari * st.session_state.calc_unitats
 
     st.write(f"**Guany o pèrdua per unitat:** {guany_unitari:.8f} USD")
     st.write(f"**Guany o pèrdua total:** {guany_total:.8f} USD")
@@ -52,38 +88,47 @@ st.markdown("---")
 # **Segona calculadora: Simulador de tokens**
 st.header("Simulador per incrementar tokens")
 
-# Check per copiar dades
-copiar_dades = st.checkbox("Copiar dades de la primera calculadora")
-
-# Variables inicials
-tokens_actuals = st.session_state.get("sim_tokens_actuals", 1.0)
-preu_venda_sim = st.session_state.get("sim_preu_venda", 0.0)
-preu_recompra = st.session_state.get("sim_preu_recompra", 0.0)
-
-# Si es marca el checkbox, emplenem les dades
-if copiar_dades:
-    tokens_actuals = unitats
-    preu_venda_sim = preu_venda
-    preu_recompra = preu_compra
+# Checkbox per copiar dades
+st.checkbox("Copiar dades de la primera calculadora", key="copiar_dades", on_change=copiar_dades)
 
 # Inputs per a la segona calculadora
-tokens_actuals = st.number_input(
-    "Quants tokens tens actualment?", value=float(tokens_actuals), min_value=0.0, step=0.0001, format="%.8f", key="sim_tokens_actuals"
+st.number_input(
+    "Quants tokens tens actualment?",
+    min_value=0.0,
+    step=0.0001,
+    format="%.8f",
+    key="sim_tokens_actuals",
 )
-preu_venda_sim = st.number_input(
-    "A quin preu vens els tokens?", value=float(preu_venda_sim), min_value=0.0, step=0.0001, format="%.8f", key="sim_preu_venda"
+st.number_input(
+    "A quin preu vens els tokens?",
+    min_value=0.0,
+    step=0.0001,
+    format="%.8f",
+    key="sim_preu_venda",
 )
-preu_recompra = st.number_input(
-    "A quin preu vols recomprar els tokens?", value=float(preu_recompra), min_value=0.0, step=0.0001, format="%.8f", key="sim_preu_recompra"
+st.number_input(
+    "A quin preu vols recomprar els tokens?",
+    min_value=0.0,
+    step=0.0001,
+    format="%.8f",
+    key="sim_preu_recompra",
 )
 
 # Botó per calcular al simulador
 if st.button("Calcular increment de tokens"):
     comissio_percent = 0.075
-    comissio = (tokens_actuals * preu_venda_sim) * (comissio_percent / 100)
-    diners_despres_venda = (tokens_actuals * preu_venda_sim) - comissio
-    tokens_recomprats = diners_despres_venda / preu_recompra if preu_recompra > 0 else 0
-    diferència_tokens = tokens_recomprats - tokens_actuals
+    comissio = (
+        st.session_state.sim_tokens_actuals * st.session_state.sim_preu_venda
+    ) * (comissio_percent / 100)
+    diners_despres_venda = (
+        st.session_state.sim_tokens_actuals * st.session_state.sim_preu_venda
+    ) - comissio
+    tokens_recomprats = (
+        diners_despres_venda / st.session_state.sim_preu_recompra
+        if st.session_state.sim_preu_recompra > 0
+        else 0
+    )
+    diferència_tokens = tokens_recomprats - st.session_state.sim_tokens_actuals
 
     st.write(f"💵 Total obtingut després de la venda (USD): {diners_despres_venda:.8f}")
     st.write(f"🔄 Tokens que podries comprar: {tokens_recomprats:.8f}")
