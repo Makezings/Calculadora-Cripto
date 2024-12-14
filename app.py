@@ -38,15 +38,18 @@ for key, value in {
     "sim_tokens_actuals": 1.0,
     "sim_preu_venda": 0.0,
     "sim_preu_recompra": 0.0,
+    "focus_cleared_calc_preu_compra": False,
+    "focus_cleared_calc_preu_venda": False,
+    "focus_cleared_calc_unitats": False,
 }.items():
     if key not in st.session_state:
         st.session_state[key] = value
 
-# Funció per gestionar el checkbox i copiar les dades
-def copiar_dades():
-    st.session_state.sim_tokens_actuals = st.session_state.calc_unitats
-    st.session_state.sim_preu_venda = st.session_state.calc_preu_venda
-    st.session_state.sim_preu_recompra = st.session_state.calc_preu_compra
+# Funció per esborrar el contingut en tocar el camp
+def clear_on_focus(key):
+    if not st.session_state[f"focus_cleared_{key}"]:
+        st.session_state[key] = ""
+        st.session_state[f"focus_cleared_{key}"] = True
 
 # **Primera calculadora: Guanys/pèrdues**
 st.title("Calculadora per criptomonedes")
@@ -57,18 +60,24 @@ st.number_input(
     step=0.0001,
     format="%.8f",
     key="calc_preu_compra",
+    on_change=clear_on_focus,
+    args=("calc_preu_compra",),
 )
 st.number_input(
     "Preu de venda unitari (USD)",
     step=0.0001,
     format="%.8f",
     key="calc_preu_venda",
+    on_change=clear_on_focus,
+    args=("calc_preu_venda",),
 )
 st.number_input(
     "Unitats (comprades o venudes)",
     step=0.0001,
     format="%.8f",
     key="calc_unitats",
+    on_change=clear_on_focus,
+    args=("calc_unitats",),
 )
 
 # Botó per calcular
@@ -89,7 +98,7 @@ st.markdown("---")
 st.header("Simulador per incrementar tokens")
 
 # Checkbox per copiar dades
-st.checkbox("Copiar dades de la primera calculadora", key="copiar_dades", on_change=copiar_dades)
+st.checkbox("Copiar dades de la primera calculadora", key="copiar_dades")
 
 # Inputs per a la segona calculadora
 st.number_input(
