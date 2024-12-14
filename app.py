@@ -18,7 +18,7 @@ def calcular_guany_unitari(preu_compra, preu_venda):
 def calcular_guany_total(guany_unitari, unitats):
     return guany_unitari * unitats
 
-# Interfície Streamlit
+# Títol principal
 st.title("Calculadora per criptomonedes")
 
 # **Primera funcionalitat: Calculadora de guanys/pèrdues**
@@ -41,29 +41,29 @@ if st.button("Calcular guanys/pèrdues"):
 st.markdown("---")
 
 # **Segona funcionalitat: Simulador de venda i recompra**
-st.header("Simulador de venda i recompra de tokens")
+st.header("Simulador per incrementar tokens")
 
-# Checkbox per copiar dades
+# Checkbox per copiar dades de la calculadora
 utilitzar_dades_calculadora = st.checkbox("Utilitzar les dades de la calculadora anterior")
 
 # Inputs del simulador
 if utilitzar_dades_calculadora:
-    venda_tokens = st.number_input("Quants tokens vols vendre?", value=int(unitats), min_value=1, step=1, key="sim_venda_tokens")
-    preu_venda_sim = st.number_input("Preu de venda per token (USD)", value=preu_venda, min_value=0.0, step=0.01, key="sim_preu_venda")
-    preu_recompra = st.number_input("Preu de recompra per token (USD)", value=preu_compra, min_value=0.0, step=0.01, key="sim_preu_recompra")
+    tokens_actuals = st.number_input("Quants tokens tens actualment?", value=int(unitats), min_value=1, step=1, key="sim_tokens_actuals")
+    preu_venda_sim = st.number_input("A quin preu vens els tokens?", value=preu_venda, min_value=0.0, step=0.01, key="sim_preu_venda")
+    preu_recompra = st.number_input("A quin preu vols recomprar els tokens?", value=preu_compra, min_value=0.0, step=0.01, key="sim_preu_recompra")
 else:
-    venda_tokens = st.number_input("Quants tokens vols vendre?", min_value=1, step=1, key="sim_venda_tokens_manual")
-    preu_venda_sim = st.number_input("Preu de venda per token (USD)", min_value=0.0, step=0.01, key="sim_preu_venda_manual")
-    preu_recompra = st.number_input("Preu de recompra per token (USD)", min_value=0.0, step=0.01, key="sim_preu_recompra_manual")
+    tokens_actuals = st.number_input("Quants tokens tens actualment?", min_value=1, step=1, key="sim_tokens_actuals_manual")
+    preu_venda_sim = st.number_input("A quin preu vens els tokens?", min_value=0.0, step=0.01, key="sim_preu_venda_manual")
+    preu_recompra = st.number_input("A quin preu vols recomprar els tokens?", min_value=0.0, step=0.01, key="sim_preu_recompra_manual")
 
 comissio_percent = 0.075  # Comissió fixa per Binance pagant en BNB
 
 # Botó per calcular al simulador
-if st.button("Calcular venda i recompra"):
-    if venda_tokens > 0 and preu_venda_sim > 0:
+if st.button("Calcular increment de tokens"):
+    if tokens_actuals > 0 and preu_venda_sim > 0:
         # Calcula el total després de la venda
-        comissio = (venda_tokens * preu_venda_sim) * (comissio_percent / 100)
-        diners_despres_venda = (venda_tokens * preu_venda_sim) - comissio
+        comissio = (tokens_actuals * preu_venda_sim) * (comissio_percent / 100)
+        diners_despres_venda = (tokens_actuals * preu_venda_sim) - comissio
         st.write(f"💵 Total obtingut després de la venda (USD): {diners_despres_venda:.2f}")
         st.write(f"🧾 Comissió deduïda (USD): {comissio:.4f}")
         
@@ -73,7 +73,7 @@ if st.button("Calcular venda i recompra"):
             st.write(f"🔄 Tokens que podries comprar al preu actual: {tokens_recomprats:.4f}")
             
             # Compara si guanyes o perds tokens
-            diferència_tokens = tokens_recomprats - venda_tokens
+            diferència_tokens = tokens_recomprats - tokens_actuals
             if diferència_tokens > 0:
                 st.success(f"🎉 Amb aquesta operació acumularies {diferència_tokens:.4f} tokens més!")
             elif diferència_tokens < 0:
