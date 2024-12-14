@@ -34,9 +34,9 @@ estilitzar()
 st.title("Calculadora per criptomonedes")
 
 st.header("Calculadora de guanys/pèrdues")
-preu_compra = st.number_input("Preu de compra unitari (USD)", value=0.0, step=0.01, key="calc_preu_compra")
-preu_venda = st.number_input("Preu de venda unitari (USD)", value=0.0, step=0.01, key="calc_preu_venda")
-unitats = st.number_input("Unitats (comprades o venudes)", value=0.0, step=1.0, key="calc_unitats")
+preu_compra = st.number_input("Preu de compra unitari (USD)", value=0.0, step=0.0001, format="%.8f", key="calc_preu_compra")
+preu_venda = st.number_input("Preu de venda unitari (USD)", value=0.0, step=0.0001, format="%.8f", key="calc_preu_venda")
+unitats = st.number_input("Unitats (comprades o venudes)", value=0.0, step=0.0001, format="%.8f", key="calc_unitats")
 
 # Botó per calcular
 if st.button("Calcular guanys/pèrdues"):
@@ -44,8 +44,8 @@ if st.button("Calcular guanys/pèrdues"):
     guany_unitari = preu_venda * (1 - comissio) - preu_compra * (1 + comissio)
     guany_total = guany_unitari * unitats
 
-    st.write(f"**Guany o pèrdua per unitat:** {guany_unitari:.4f} USD")
-    st.write(f"**Guany o pèrdua total:** {guany_total:.2f} USD")
+    st.write(f"**Guany o pèrdua per unitat:** {guany_unitari:.8f} USD")
+    st.write(f"**Guany o pèrdua total:** {guany_total:.8f} USD")
 
 st.markdown("---")
 
@@ -55,14 +55,27 @@ st.header("Simulador per incrementar tokens")
 # Check per copiar dades
 copiar_dades = st.checkbox("Copiar dades de la primera calculadora")
 
+# Variables inicials
+tokens_actuals = st.session_state.get("sim_tokens_actuals", 1.0)
+preu_venda_sim = st.session_state.get("sim_preu_venda", 0.0)
+preu_recompra = st.session_state.get("sim_preu_recompra", 0.0)
+
+# Si es marca el checkbox, emplenem les dades
 if copiar_dades:
     tokens_actuals = unitats
     preu_venda_sim = preu_venda
     preu_recompra = preu_compra
-else:
-    tokens_actuals = st.number_input("Quants tokens tens actualment?", min_value=1, step=1, key="sim_tokens_actuals")
-    preu_venda_sim = st.number_input("A quin preu vens els tokens?", min_value=0.0, step=0.01, key="sim_preu_venda")
-    preu_recompra = st.number_input("A quin preu vols recomprar els tokens?", min_value=0.0, step=0.01, key="sim_preu_recompra")
+
+# Inputs per a la segona calculadora
+tokens_actuals = st.number_input(
+    "Quants tokens tens actualment?", value=float(tokens_actuals), min_value=0.0, step=0.0001, format="%.8f", key="sim_tokens_actuals"
+)
+preu_venda_sim = st.number_input(
+    "A quin preu vens els tokens?", value=float(preu_venda_sim), min_value=0.0, step=0.0001, format="%.8f", key="sim_preu_venda"
+)
+preu_recompra = st.number_input(
+    "A quin preu vols recomprar els tokens?", value=float(preu_recompra), min_value=0.0, step=0.0001, format="%.8f", key="sim_preu_recompra"
+)
 
 # Botó per calcular al simulador
 if st.button("Calcular increment de tokens"):
@@ -72,11 +85,11 @@ if st.button("Calcular increment de tokens"):
     tokens_recomprats = diners_despres_venda / preu_recompra if preu_recompra > 0 else 0
     diferència_tokens = tokens_recomprats - tokens_actuals
 
-    st.write(f"💵 Total obtingut després de la venda (USD): {diners_despres_venda:.2f}")
-    st.write(f"🔄 Tokens que podries comprar: {tokens_recomprats:.4f}")
+    st.write(f"💵 Total obtingut després de la venda (USD): {diners_despres_venda:.8f}")
+    st.write(f"🔄 Tokens que podries comprar: {tokens_recomprats:.8f}")
     if diferència_tokens > 0:
-        st.success(f"🎉 Acumularies {diferència_tokens:.4f} tokens més!")
+        st.success(f"🎉 Acumularies {diferència_tokens:.8f} tokens més!")
     elif diferència_tokens < 0:
-        st.error(f"⚠️ Perdries {-diferència_tokens:.4f} tokens.")
+        st.error(f"⚠️ Perdries {-diferència_tokens:.8f} tokens.")
     else:
         st.info("🔄 No canviaria el nombre de tokens.")
