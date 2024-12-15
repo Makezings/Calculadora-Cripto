@@ -72,14 +72,23 @@ else:
 
 comissio_percent = 0.075  # Comissió fixa per Binance pagant en BNB
 
-# Botó per calcular al simulador
-if st.button("Calcular increment de tokens"):
-    if tokens_actuals > 0 and preu_venda_sim > 0:
-        # Calcula el total després de la venda
-        comissio = (tokens_actuals * preu_venda_sim) * (comissio_percent / 100)
-        diners_despres_venda = (tokens_actuals * preu_venda_sim) - comissio
-        st.write(f"💵 **Total obtingut després de la venda (USD):** {diners_despres_venda:.2f}")
-        st.write(f"🧾 **Comissió deduïda (USD):** {comissio:.4f}")
+# Botó per calcular
+if st.button("Calcular guanys/pèrdues"):
+    comissio = 0.00075  # Comissió fixa de Binance en BNB
+    cost_total = preu_compra * unitats * (1 + comissio)
+    guany_unitari = calcular_guany_unitari(preu_compra, preu_venda)
+    guany_total = calcular_guany_total(guany_unitari, unitats)
+
+    if cost_total > 0:  # Per evitar dividir per zero
+        percentatge_guany = (guany_total / cost_total) * 100
+    else:
+        percentatge_guany = 0
+
+    st.write(f"💵 **Cost total de l'operació (USD):** {cost_total:.2f}")
+    st.write(f"**Guany o pèrdua per unitat:** {guany_unitari:.4f} USD")
+    st.write(f"💰 **Guany o pèrdua total:** {guany_total:.2f} USD")
+    st.write(f"📊 **Percentatge de guany/pèrdua:** {percentatge_guany:.2f}%")
+
         
         # Calcula quants tokens pots recomprar
         if preu_recompra > 0:
