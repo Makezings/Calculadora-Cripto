@@ -53,8 +53,8 @@ if utilitzar_dades_calculadora:
     preu_recompra = st.number_input("A quin preu vols recomprar els tokens?", value=preu_compra, min_value=0.0, step=0.01, key="sim_preu_recompra")
 else:
     tokens_actuals = st.number_input("Quants tokens tens actualment?", min_value=1, step=1, key="sim_tokens_actuals_manual")
-    preu_venda_sim = st.number_input("A quin preu vens els tokens?", min_value=0.0, step=0.01, key="sim_preu_venda_manual")
-    preu_recompra = st.number_input("A quin preu vols recomprar els tokens?", min_value=0.0, step=0.01, key="sim_preu_recompra_manual")
+    preu_venda_sim = st.number_input("A quin preu mig tens els tokens?", min_value=0.0, step=0.01, key="sim_preu_venda_manual")
+    preu_recompra = st.number_input("A quin preu voldries operar?", min_value=0.0, step=0.01, key="sim_preu_recompra_manual")
 
 comissio_percent = 0.075  # Comissió fixa per Binance pagant en BNB
 
