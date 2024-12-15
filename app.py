@@ -43,6 +43,20 @@ st.markdown("---")
 # **Segona funcionalitat: Simulador de venda i recompra**
 st.header("Simulador per incrementar tokens")
 
+# Explicació de l'estratègia
+st.markdown(
+    """
+    **Nota sobre aquesta estratègia:**
+    Aquesta operació està pensada per **acumular més tokens** aprofitant les fluctuacions de preu. No genera un guany immediat en dòlars, sinó que busca augmentar el teu volum de tokens per a un possible guany futur.
+
+    ⚠️ Aquesta estratègia només és efectiva si:
+    - El preu del mercat puja significativament en el futur.
+    - Recomprar els tokens redueix el preu mig de la teva posició.
+    
+    Si no creus que el preu pugui pujar o prefereixes guanyar en dòlars a curt termini, aquesta estratègia no és recomanable.
+    """
+)
+
 # Checkbox per copiar dades de la calculadora
 utilitzar_dades_calculadora = st.checkbox("Utilitzar les dades de la calculadora anterior")
 
@@ -53,8 +67,8 @@ if utilitzar_dades_calculadora:
     preu_recompra = st.number_input("A quin preu vols recomprar els tokens?", value=preu_compra, min_value=0.0, step=0.01, key="sim_preu_recompra")
 else:
     tokens_actuals = st.number_input("Quants tokens tens actualment?", min_value=1, step=1, key="sim_tokens_actuals_manual")
-    preu_venda_sim = st.number_input("A quin preu mig tens els tokens?", min_value=0.0, step=0.01, key="sim_preu_venda_manual")
-    preu_recompra = st.number_input("A quin preu voldries operar?", min_value=0.0, step=0.01, key="sim_preu_recompra_manual")
+    preu_venda_sim = st.number_input("A quin preu vens els tokens?", min_value=0.0, step=0.01, key="sim_preu_venda_manual")
+    preu_recompra = st.number_input("A quin preu vols recomprar els tokens?", min_value=0.0, step=0.01, key="sim_preu_recompra_manual")
 
 comissio_percent = 0.075  # Comissió fixa per Binance pagant en BNB
 
@@ -64,13 +78,13 @@ if st.button("Calcular increment de tokens"):
         # Calcula el total després de la venda
         comissio = (tokens_actuals * preu_venda_sim) * (comissio_percent / 100)
         diners_despres_venda = (tokens_actuals * preu_venda_sim) - comissio
-        st.write(f"💵 Total obtingut després de la venda (USD): {diners_despres_venda:.2f}")
-        st.write(f"🧾 Comissió deduïda (USD): {comissio:.4f}")
+        st.write(f"💵 **Total obtingut després de la venda (USD):** {diners_despres_venda:.2f}")
+        st.write(f"🧾 **Comissió deduïda (USD):** {comissio:.4f}")
         
         # Calcula quants tokens pots recomprar
         if preu_recompra > 0:
             tokens_recomprats = diners_despres_venda / preu_recompra
-            st.write(f"🔄 Tokens que podries comprar al preu actual: {tokens_recomprats:.4f}")
+            st.write(f"🔄 **Tokens que podries comprar al preu actual:** {tokens_recomprats:.4f}")
             
             # Compara si guanyes o perds tokens
             diferència_tokens = tokens_recomprats - tokens_actuals
