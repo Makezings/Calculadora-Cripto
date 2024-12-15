@@ -1,149 +1,82 @@
 import streamlit as st
 
-# Funció per estilitzar inputs i millorar l'experiència
-def estilitzar():
-    st.markdown(
-        """
-        <style>
-        /* Inputs numèrics més grans */
-        input[type=number] {
-            font-size: 1.5rem !important;
-            height: 3rem !important;
-            text-align: center !important;
-        }
-        /* Centrat del contingut */
-        div[data-testid="stNumberInput"] {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 1rem;
-        }
-        /* Botons més accessibles */
-        button {
-            font-size: 1.2rem !important;
-            padding: 0.5rem 1rem;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
+# Calculadora original: Càlcul de guanys/pèrdues
+def calcular_guany_unitari(preu_compra, preu_venda):
+    # Comissió fixa de Binance en BNB (0.075% = 0.00075)
+    comissio = 0.00075
 
-# Aplica els estils personalitzats
-estilitzar()
+    # Cost unitari de compra amb comissió
+    cost_unitari_compra = preu_compra * (1 + comissio)
 
-# **Inicialitza valors a Session State si no existeixen**
-for key, value in {
-    "calc_preu_compra": 0.0,
-    "calc_preu_venda": 0.0,
-    "calc_unitats": 0.0,
-    "sim_tokens_actuals": 1.0,
-    "sim_preu_venda": 0.0,
-    "sim_preu_recompra": 0.0,
-    "focus_cleared_calc_preu_compra": False,
-    "focus_cleared_calc_preu_venda": False,
-    "focus_cleared_calc_unitats": False,
-}.items():
-    if key not in st.session_state:
-        st.session_state[key] = value
+    # Ingrés unitari de venda amb comissió
+    ingress_unitari_venda = preu_venda * (1 - comissio)
 
-# Funció per esborrar el contingut en tocar el camp
-def clear_on_focus(key):
-    if not st.session_state[f"focus_cleared_{key}"]:
-        st.session_state[key] = ""
-        st.session_state[f"focus_cleared_{key}"] = True
+    # Guany/pèrdua unitari
+    guany_unitari = ingress_unitari_venda - cost_unitari_compra
+    return guany_unitari
 
-# **Primera calculadora: Guanys/pèrdues**
+def calcular_guany_total(guany_unitari, unitats):
+    return guany_unitari * unitats
+
+# Títol principal
 st.title("Calculadora per criptomonedes")
 
+# **Primera funcionalitat: Calculadora de guanys/pèrdues**
 st.header("Calculadora de guanys/pèrdues")
-st.number_input(
-    "Preu de compra unitari (USD)",
-    step=0.0001,
-    format="%.8f",
-    key="calc_preu_compra",
-    on_change=clear_on_focus,
-    args=("calc_preu_compra",),
-)
-st.number_input(
-    "Preu de venda unitari (USD)",
-    step=0.0001,
-    format="%.8f",
-    key="calc_preu_venda",
-    on_change=clear_on_focus,
-    args=("calc_preu_venda",),
-)
-st.number_input(
-    "Unitats (comprades o venudes)",
-    step=0.0001,
-    format="%.8f",
-    key="calc_unitats",
-    on_change=clear_on_focus,
-    args=("calc_unitats",),
-)
+
+# Inputs de la calculadora original
+preu_compra = st.number_input("Preu de compra unitari (USD)", value=0.0, key="calc_preu_compra")
+preu_venda = st.number_input("Preu de venda unitari (USD)", value=0.0, key="calc_preu_venda")
+unitats = st.number_input("Unitats (comprades o venudes)", value=0.0, key="calc_unitats")
 
 # Botó per calcular
 if st.button("Calcular guanys/pèrdues"):
-    comissio = 0.00075
-    guany_unitari = (
-        st.session_state.calc_preu_venda * (1 - comissio)
-        - st.session_state.calc_preu_compra * (1 + comissio)
-    )
-    guany_total = guany_unitari * st.session_state.calc_unitats
+    guany_unitari = calcular_guany_unitari(preu_compra, preu_venda)
+    guany_total = calcular_guany_total(guany_unitari, unitats)
 
-    st.write(f"**Guany o pèrdua per unitat:** {guany_unitari:.8f} USD")
-    st.write(f"**Guany o pèrdua total:** {guany_total:.8f} USD")
+    st.write(f"**Guany o pèrdua per unitat:** {guany_unitari:.4f} USD")
+    st.write(f"**Guany o pèrdua total:** {guany_total:.2f} USD")
 
+# Separador
 st.markdown("---")
 
-# **Segona calculadora: Simulador de tokens**
+# **Segona funcionalitat: Simulador de venda i recompra**
 st.header("Simulador per incrementar tokens")
 
-# Checkbox per copiar dades
-st.checkbox("Copiar dades de la primera calculadora", key="copiar_dades")
+# Checkbox per copiar dades de la calculadora
+utilitzar_dades_calculadora = st.checkbox("Utilitzar les dades de la calculadora anterior")
 
-# Inputs per a la segona calculadora
-st.number_input(
-    "Quants tokens tens actualment?",
-    min_value=0.0,
-    step=0.0001,
-    format="%.8f",
-    key="sim_tokens_actuals",
-)
-st.number_input(
-    "A quin preu vens els tokens?",
-    min_value=0.0,
-    step=0.0001,
-    format="%.8f",
-    key="sim_preu_venda",
-)
-st.number_input(
-    "A quin preu vols recomprar els tokens?",
-    min_value=0.0,
-    step=0.0001,
-    format="%.8f",
-    key="sim_preu_recompra",
-)
+# Inputs del simulador
+if utilitzar_dades_calculadora:
+    tokens_actuals = st.number_input("Quants tokens tens actualment?", value=int(unitats), min_value=1, step=1, key="sim_tokens_actuals")
+    preu_venda_sim = st.number_input("A quin preu vens els tokens?", value=preu_venda, min_value=0.0, step=0.01, key="sim_preu_venda")
+    preu_recompra = st.number_input("A quin preu vols recomprar els tokens?", value=preu_compra, min_value=0.0, step=0.01, key="sim_preu_recompra")
+else:
+    tokens_actuals = st.number_input("Quants tokens tens actualment?", min_value=1, step=1, key="sim_tokens_actuals_manual")
+    preu_venda_sim = st.number_input("A quin preu vens els tokens?", min_value=0.0, step=0.01, key="sim_preu_venda_manual")
+    preu_recompra = st.number_input("A quin preu vols recomprar els tokens?", min_value=0.0, step=0.01, key="sim_preu_recompra_manual")
+
+comissio_percent = 0.075  # Comissió fixa per Binance pagant en BNB
 
 # Botó per calcular al simulador
 if st.button("Calcular increment de tokens"):
-    comissio_percent = 0.075
-    comissio = (
-        st.session_state.sim_tokens_actuals * st.session_state.sim_preu_venda
-    ) * (comissio_percent / 100)
-    diners_despres_venda = (
-        st.session_state.sim_tokens_actuals * st.session_state.sim_preu_venda
-    ) - comissio
-    tokens_recomprats = (
-        diners_despres_venda / st.session_state.sim_preu_recompra
-        if st.session_state.sim_preu_recompra > 0
-        else 0
-    )
-    diferència_tokens = tokens_recomprats - st.session_state.sim_tokens_actuals
-
-    st.write(f"💵 Total obtingut després de la venda (USD): {diners_despres_venda:.8f}")
-    st.write(f"🔄 Tokens que podries comprar: {tokens_recomprats:.8f}")
-    if diferència_tokens > 0:
-        st.success(f"🎉 Acumularies {diferència_tokens:.8f} tokens més!")
-    elif diferència_tokens < 0:
-        st.error(f"⚠️ Perdries {-diferència_tokens:.8f} tokens.")
-    else:
-        st.info("🔄 No canviaria el nombre de tokens.")
+    if tokens_actuals > 0 and preu_venda_sim > 0:
+        # Calcula el total després de la venda
+        comissio = (tokens_actuals * preu_venda_sim) * (comissio_percent / 100)
+        diners_despres_venda = (tokens_actuals * preu_venda_sim) - comissio
+        st.write(f"💵 Total obtingut després de la venda (USD): {diners_despres_venda:.2f}")
+        st.write(f"🧾 Comissió deduïda (USD): {comissio:.4f}")
+        
+        # Calcula quants tokens pots recomprar
+        if preu_recompra > 0:
+            tokens_recomprats = diners_despres_venda / preu_recompra
+            st.write(f"🔄 Tokens que podries comprar al preu actual: {tokens_recomprats:.4f}")
+            
+            # Compara si guanyes o perds tokens
+            diferència_tokens = tokens_recomprats - tokens_actuals
+            if diferència_tokens > 0:
+                st.success(f"🎉 Amb aquesta operació acumularies {diferència_tokens:.4f} tokens més!")
+            elif diferència_tokens < 0:
+                st.error(f"⚠️ Perdries {-diferència_tokens:.4f} tokens amb aquesta operació.")
+            else:
+                st.info("🔄 El nombre de tokens es mantindria igual.")
