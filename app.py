@@ -16,6 +16,7 @@ def calcular_guany_unitari(preu_compra, preu_venda):
     return guany_unitari
 
 def calcular_guany_total(guany_unitari, unitats):
+    # Guany total en funció del guany unitari i les unitats venudes
     return guany_unitari * unitats
 
 # Títol principal
@@ -31,17 +32,56 @@ unitats = st.number_input("Unitats (comprades o venudes)", value=0.0, key="calc_
 
 # Botó per calcular
 if st.button("Calcular guanys/pèrdues"):
+    comissio = 0.00075  # Comissió fixa de Binance en BNB
+    cost_total = preu_compra * unitats * (1 + comissio)  # Cost total de l'operació amb comissió
     guany_unitari = calcular_guany_unitari(preu_compra, preu_venda)
     guany_total = calcular_guany_total(guany_unitari, unitats)
 
-    st.write(f"**Guany o pèrdua per unitat:** {guany_unitari:.4f} USD")
-    st.write(f"**Guany o pèrdua total:** {guany_total:.2f} USD")
+    if cost_total > 0:  # Per evitar dividir per zero
+        percentatge_guany = (guany_total / cost_total) * 100
+    else:
+        percentatge_guany = 0
+
+    # Mostra el cost total
+    st.write(f"💵 **Cost total de l'operació (USD):** {cost_total:.2f}")
+    
+    # Mostra només guany o pèrdua per unitat segons el cas
+    if guany_unitari > 0:
+        st.success(f"**Guany per unitat:** {guany_unitari:.4f} USD")
+    elif guany_unitari < 0:
+        st.error(f"**Pèrdua per unitat:** {abs(guany_unitari):.4f} USD")
+    else:
+        st.info("🔄 **No hi ha guany ni pèrdua per unitat.**")
+
+    # Mostra només guany o pèrdua total segons el cas
+    if guany_total > 0:
+        st.success(f"💰 **Guany total:** {guany_total:.2f} USD")
+        st.success(f"📊 **Percentatge de guany:** {percentatge_guany:.2f}%")
+    elif guany_total < 0:
+        st.error(f"💸 **Pèrdua total:** {abs(guany_total):.2f} USD")
+        st.error(f"📊 **Percentatge de pèrdua:** {abs(percentatge_guany):.2f}%")
+    else:
+        st.info("🔄 **No hi ha guany ni pèrdua total.**")
 
 # Separador
 st.markdown("---")
 
 # **Segona funcionalitat: Simulador de venda i recompra**
 st.header("Simulador per incrementar tokens")
+
+# Explicació de l'estratègia
+st.markdown(
+    """
+    **Nota sobre aquesta estratègia:**
+    Aquesta operació està pensada per **acumular més tokens** aprofitant les fluctuacions de preu. No genera un guany immediat en dòlars, sinó que busca augmentar el teu volum de tokens per a un possible guany futur.
+
+    ⚠️ Aquesta estratègia només és efectiva si:
+    - El preu del mercat puja significativament en el futur.
+    - Recomprar els tokens redueix el preu mig de la teva posició.
+    
+    Si no creus que el preu pugui pujar o prefereixes guanyar en dòlars a curt termini, aquesta estratègia no és recomanable.
+    """
+)
 
 # Checkbox per copiar dades de la calculadora
 utilitzar_dades_calculadora = st.checkbox("Utilitzar les dades de la calculadora anterior")
@@ -53,8 +93,8 @@ if utilitzar_dades_calculadora:
     preu_recompra = st.number_input("A quin preu vols recomprar els tokens?", value=preu_compra, min_value=0.0, step=0.01, key="sim_preu_recompra")
 else:
     tokens_actuals = st.number_input("Quants tokens tens actualment?", min_value=1, step=1, key="sim_tokens_actuals_manual")
-    preu_venda_sim = st.number_input("A quin preu mig tens els tokens?", min_value=0.0, step=0.01, key="sim_preu_venda_manual")
-    preu_recompra = st.number_input("A quin preu voldries operar?", min_value=0.0, step=0.01, key="sim_preu_recompra_manual")
+    preu_venda_sim = st.number_input("A quin preu vens els tokens?", min_value=0.0, step=0.01, key="sim_preu_venda_manual")
+    preu_recompra = st.number_input("A quin preu vols recomprar els tokens?", min_value=0.0, step=0.01, key="sim_preu_recompra_manual")
 
 comissio_percent = 0.075  # Comissió fixa per Binance pagant en BNB
 
