@@ -4,10 +4,10 @@ import streamlit as st
 st.markdown(
     """
     <style>
-    /* Augmentar la mida dels inputs */
+    /* Augmentar la mida dels inputs un 50% més */
     input[type=number] {
-        font-size: 20px !important;
-        height: 60px !important;
+        font-size: 30px !important; /* Augmenta la mida de la font */
+        height: 90px !important;   /* Augmenta l'altura del camp */
     }
     </style>
     """,
